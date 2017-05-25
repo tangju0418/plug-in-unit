@@ -19,7 +19,9 @@
 			  $(go.Diagram, "myDiagramDiv",
 			  	{
 			  		initialContentAlignment: go.Spot.Center,
-			  		"undoManager.isEnabled": true
+			  		"undoManager.isEnabled": true,
+			  		layout: $(go.TreeLayout, 
+                		{ angle: 90, layerSpacing: 35 })
 			  	});
 			myDiagram.nodeTemplate =
 			  $(go.Node, "Horizontal",
@@ -34,7 +36,11 @@
 			      new go.Binding("text", "name"))
 			  );
 
-
+			myDiagram.linkTemplate =
+			  $(go.Link,
+			    { routing: go.Link.Orthogonal, corner: 5 },
+			    $(go.Shape, { strokeWidth: 3, stroke: "#555" })); 
+			  
 			var model = $(go.TreeModel);
 			model.nodeDataArray =
 			[ // the "key" and "parent" property names are required,
