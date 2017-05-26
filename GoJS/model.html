@@ -24,12 +24,15 @@
                 		{ angle: 90, layerSpacing: 35 })
 			  	});
 			myDiagram.nodeTemplate =
-			  $(go.Node, "Horizontal",
-			    { background: "#44CCFF" },
-			    $(go.Picture,
-			      { margin: 10, width: 50, height: 50, background: "red" },
-			      // Picture.source is data bound to the "source" attribute of the model data
-			      new go.Binding("source")),
+			$(go.Node, "Auto",
+				$(go.Shape,"RoundedRectangle",
+		    	{fill:$(go.Brush,"Linear",
+                  { 0.0:"Violet",0.5:'lightblue',1.0:"Lavender" })}),
+			  // $(go.Node, "Horizontal",
+			    // { background: "#44CCFF" },
+			    // $(go.Picture,
+			    //   { margin: 10, width: 50, height: 50, background: "red" },
+			      // new go.Binding("source")),
 			    $(go.TextBlock,
 			      "Default Text", 
 			      { margin: 12, stroke: "white", font: "bold 16px sans-serif" },
