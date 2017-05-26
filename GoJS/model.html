@@ -20,61 +20,84 @@
 			  	{
 			  		initialContentAlignment: go.Spot.Center,
 			  		"undoManager.isEnabled": true,
-			  		layout: $(go.TreeLayout, 
-                		{ angle: 90, layerSpacing: 35 }),
+			  		layout: $(go.ForceDirectedLayout,
+                    { 
+                    	defaultSpringLength: 50,
+                    	defaultElectricalCharge: 50 
+                    }),
 			  		"toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom
 			  	});
 			myDiagram.nodeTemplate =
 			$(go.Node, "Auto",
+				{ locationSpot: go.Spot.Center },
 				$(go.Shape,"RoundedRectangle",
-		    	{
+		    	{	
+		    		cursor: "pointer",
 		    		fill:$(go.Brush,"Linear",
                   { 
                   	0.0:"Violet",0.5:'lightblue',1.0:"Lavender"
                   })
-		    	}),
-			  // $(go.Node, "Horizontal",
-			    // { background: "#44CCFF" },
-			    // $(go.Picture,
-			    //   { margin: 10, width: 50, height: 50, background: "red" },
-			      // new go.Binding("source")),
+		    	},new go.Binding("fill", "color")),
 			    $(go.TextBlock,
 			      "Default Text", 
 			      { 
 			      	  text:"textAlign:'center'",
 			      	  margin: 12, 
-			      	  stroke: "white", 
+			      	  stroke: "black", 
 			      	  font: "bold 16px sans-serif" ,
 			      	  width:200,
 				      wrap:go.TextBlock.WrapFit,
 				      editable: true
 				  },
-				      new go.Binding("text", "name"))
-				  );
+				      new go.Binding("text")
+				)
+
+			);
 
 			myDiagram.linkTemplate =
 			  $(go.Link,
-			    { routing: go.Link.Orthogonal, corner: 5 },
+			    { routing: go.Link.AvoidsNodes, corner: 5 },
 			    $(go.Shape, { strokeWidth: 3, stroke: "#555" }),
 			    $(go.Shape,  {
+
 			    	toArrow:'OpenTriangle',
 			    	fill:null, 
 			    	stroke: "#555",
-			    	strokeWidth:3 })
-			    ); 
+			    	strokeWidth:3 }),
+			    $(go.Panel, "Auto",
+		          { _isLinkLabel: true },  // marks this Panel as being a draggable label
+		          $(go.Shape, { fill: "#DAE4E4",strokeWidth:0 }),
+		          $(go.TextBlock, "?", {
+		           		margin: 5 ,
+		           		editable: true
+		       		},
+		            new go.Binding("text", "color")),
+		          // remember any modified segment properties in the link data object
+		          new go.Binding("segmentIndex").makeTwoWay(),
+		          new go.Binding("segmentFraction").makeTwoWay()
+		        )
+			); 
 			  
 			var model = $(go.TreeModel);
-			model.nodeDataArray =
-			[ // the "key" and "parent" property names are required,
-			  // but you can add whatever data properties you need for your app
-			  { key: "1",              name: "Don Meow",   source: "cat1.png" },
-			  { key: "2", parent: "1", name: "Demeter",    source: "cat2.png" },
-			  { key: "3", parent: "1", name: "Copricat",   source: "cat3.png" },
-			  { key: "4", parent: "3", name: "Jellylorum", source: "cat4.png" },
-			  { key: "5", parent: "3", name: "Alonzo",     source: "cat5.png" },
-			  { key: "6", parent: "2", name: "Munkustrap", source: "cat6.png" }
-			];
-			myDiagram.model = model;
+			myDiagram.model = new go.GraphLinksModel([
+		        { key: 1, text: "one", color: "lightyellow" },
+		        { key: 2, text: "two", color: "brown" },
+		        { key: 3, text: "three", color: "green" },
+		        { key: 4, text: "four", color: "slateblue" },
+		        { key: 5, text: "five", color: "aquamarine" },
+		        { key: 6, text: "six", color: "lightgreen" },
+		        { key: 7, text: "seven" }
+		    ], [
+		        { from: 5, to: 6, color: "orange" },
+		        { from: 1, to: 2, color: "red" },
+		        { from: 1, to: 3, color: "blue" },
+		        { from: 1, to: 4, color: "goldenrod" },
+		        { from: 2, to: 5, color: "fuchsia" },
+		        { from: 3, to: 5, color: "green" },
+		        { from: 4, to: 5, color: "black" },
+		        { from: 6, to: 7 }
+		    ]);
+	
 
 		</script>
 	</body>  
