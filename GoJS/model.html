@@ -3,23 +3,64 @@
         <meta charset="utf-8">  
         <title>管道图</title> 
         <style>
-        	#myDiagramDiv{
-        		width:800px; 
+        	body{
+        		padding:0;
+        		margin:0;
+        	}
+        	.content{
+        		width:80%; 
         		height:600px; 
-        		background-color: #DAE4E4;
+        		margin:0 auto;
+        	}
+        	#myDiagramDiv{
+        		margin-left:150px;
+        		height:100%; 
+        		background-color: #fff;
+        		border:1px solid #f3f3f3;
+        		z-index:0;
+        	}
+        	#myPaletteDiv{
+        		position: absolute;
+        		width:150px;
+        		height:600px;
+        		top:0;
+        		left:10%;
+        		z-index:1;
+        		background-color: #84acb3;
+        	}
+        	#myOverviewDiv{
+        		position: absolute;
+        		right:10%;
+        		top:0; 
+        		width:200px;
+        		height:200px;
+        		margin:20px 20px 0 0;
+        		background-color: #f3f3f3;
+        		opacity: 0.5;
+        		z-index:2;
+        		overflow: hidden;
         	}
         </style> 
     </head> 
-	<body>  
-		<div id="myDiagramDiv"></div>
+	<body> 
+		<div class="content">
+			<div id="myDiagramDiv"></div>
+			<div id="myPaletteDiv"></div>
+		</div>
+		
+		<div id="myOverviewDiv"></div>
+
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/gojs/1.7.11/go-debug.js"></script>
 		<script>
+		(function(){
 			var $ = go.GraphObject.make;
+		
 			var myDiagram =
 			  $(go.Diagram, "myDiagramDiv",
 			  	{
 			  		initialContentAlignment: go.Spot.Center,
 			  		"undoManager.isEnabled": true,
+			  		allowDrop: true, 
 			  		layout: $(go.ForceDirectedLayout,
                     { 
                     	defaultSpringLength: 50,
@@ -30,21 +71,32 @@
 			myDiagram.nodeTemplate =
 			$(go.Node, "Auto",
 				{ locationSpot: go.Spot.Center },
-				$(go.Shape,"RoundedRectangle",
-		    	{	
-		    		cursor: "pointer",
-		    		fill:$(go.Brush,"Linear",
-                  { 
-                  	0.0:"Violet",0.5:'lightblue',1.0:"Lavender"
-                  })
-		    	},new go.Binding("fill", "color")),
+				// $(go.Shape,"RoundedRectangle",{
+			 //      	fill: "#DAE4E4",
+			 //      	width:120,
+			 //      	height:120,
+			 //      	cursor: 'pointer'
+			 //      },
+			 //      new go.Binding("figure", "shape")),
+				$(go.Shape,
+			    	{	
+			    		figure:'RoundedRectangle',
+			    		cursor: "pointer",
+			    		// width:120,
+			    		// height:120,
+			    		fill: "lightblue"
+			    	},
+		    		new go.Binding("figure", "shape"),
+		    		new go.Binding("fill", "color")),
 			    $(go.TextBlock,
 			      "Default Text", 
+			      
+		
 			      { 
 			      	  text:"textAlign:'center'",
 			      	  margin: 12, 
 			      	  stroke: "black", 
-			      	  font: "bold 16px sans-serif" ,
+			      	  font: "bold 14px sans-serif" ,
 			      	  width:200,
 				      wrap:go.TextBlock.WrapFit,
 				      editable: true
@@ -57,48 +109,60 @@
 			myDiagram.linkTemplate =
 			  $(go.Link,
 			    { routing: go.Link.AvoidsNodes, corner: 5 },
-			    $(go.Shape, { strokeWidth: 3, stroke: "#555" }),
+			    $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
 			    $(go.Shape,  {
 
 			    	toArrow:'OpenTriangle',
 			    	fill:null, 
-			    	stroke: "#555",
-			    	strokeWidth:3 }),
+			    	stroke: "#ca221f",
+			    	strokeWidth:2 }),
 			    $(go.Panel, "Auto",
-		          { _isLinkLabel: true },  // marks this Panel as being a draggable label
 		          $(go.Shape, { fill: "#DAE4E4",strokeWidth:0 }),
 		          $(go.TextBlock, "?", {
 		           		margin: 5 ,
 		           		editable: true
 		       		},
-		            new go.Binding("text", "color")),
-		          // remember any modified segment properties in the link data object
-		          new go.Binding("segmentIndex").makeTwoWay(),
-		          new go.Binding("segmentFraction").makeTwoWay()
+		            new go.Binding("text")),
+		     
+	            new go.Binding("segmentIndex").makeTwoWay(),
+	            new go.Binding("segmentFraction").makeTwoWay()
 		        )
 			); 
 			  
-			var model = $(go.TreeModel);
 			myDiagram.model = new go.GraphLinksModel([
-		        { key: 1, text: "one", color: "lightyellow" },
-		        { key: 2, text: "two", color: "brown" },
-		        { key: 3, text: "three", color: "green" },
-		        { key: 4, text: "four", color: "slateblue" },
-		        { key: 5, text: "five", color: "aquamarine" },
-		        { key: 6, text: "six", color: "lightgreen" },
-		        { key: 7, text: "seven" }
+		        { key: 1, text: "start", shape: "Ellipse", color: "brown" },
+		        { key: 2, text: "question1", shape: "Diamond", color: "slateblue" },
+		        { key: 3, text: "ok", shape: "Rectangle", color: "orange" },
+		        { key: 4, text: "no", shape: "Diamond", color: "slateblue" },
+		        { key: 5, text: "five", shape: "auto", color: "aquamarine" },
+		        { key: 6, text: "six", shape: "Rectangle", color: "orange" },
+		        { key: 7, text: "seven",shape: "auto", color: "aquamarine" }
 		    ], [
-		        { from: 5, to: 6, color: "orange" },
-		        { from: 1, to: 2, color: "red" },
-		        { from: 1, to: 3, color: "blue" },
-		        { from: 1, to: 4, color: "goldenrod" },
-		        { from: 2, to: 5, color: "fuchsia" },
-		        { from: 3, to: 5, color: "green" },
-		        { from: 4, to: 5, color: "black" },
+		        { from: 1, to: 2, text: ""},
+		        { from: 2, to: 3, text: "yes" },
+		        { from: 2, to: 4, text: "no" },
+		        { from: 3, to: 5, text: "fuchsia" },
+		     
+		        { from: 4, to: 6, text: "black" },
+		        { from: 6, to: 5, text: "black" },
 		        { from: 6, to: 7 }
 		    ]);
-	
 
+
+			var myPalette =
+			      $(go.Palette, "myPaletteDiv",  
+			        {
+			          nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
+			          model: new go.GraphLinksModel([ 
+				        { text: "Question", shape: "Diamond", color: "slateblue" },
+				        { text: "Action", shape: "Rectangle", color: "orange" },
+				        { text: "Output",shape: "auto", color: "aquamarine" }
+			          ])
+			        });
+			var myOverview =
+			    $(go.Overview, "myOverviewDiv",
+			      { observed: myDiagram });
+		})()
 		</script>
 	</body>  
 </html>  
