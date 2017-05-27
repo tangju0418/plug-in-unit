@@ -1,0 +1,59 @@
+body{
+        padding:0;
+        margin:0;
+        background-color: #f6f6f6;
+        font-family: sans-serif;
+}
+.content{
+	width:80%; 
+	height:600px; 
+	margin:0 auto;
+}
+#myDiagramDiv{
+	margin-left:180px;
+	height:100%; 
+	background-color: #fff;
+	border:1px solid #f3f3f3;
+}
+#myPaletteDiv{
+	position: absolute;
+	width:180px;
+	height:600px;
+	top:0;
+	left:10%;
+	background-color: #84acb3;
+}
+#myOverviewDiv{
+	position: absolute;
+	right:10%;
+	top:0; 
+	width:200px;
+	height:200px;
+	margin:20px 20px 0 0;
+	background-color: #f3f3f3;
+	opacity: 0.5;
+	z-index:2;
+	overflow: hidden;
+}
+@media screen and (max-width: 600px) {
+        .content{
+                width:100%; 
+                height:auto;
+        }
+        #myPaletteDiv{
+                position: relative;
+                width:100%;
+                height:130px;
+                left:0;
+                background-color: #84acb3;
+        }
+        #myDiagramDiv{
+                margin-left:0;
+                width:100%;
+                height:600px;
+                background-color: #fff;
+        }
+        #myOverviewDiv{
+                top:170px;
+        }
+}
