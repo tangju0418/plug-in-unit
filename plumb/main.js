@@ -24,7 +24,6 @@
       initialContentAlignment: go.Spot.Center,
       allowDrop: true,  
       "undoManager.isEnabled": true,
-       // resizingTool: new ResizeMultipleTool(),
       "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
     });
   var nodeResizeAdornmentTemplate =
@@ -43,29 +42,86 @@
       $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
     );
 
+  var nodeSelectionAdornmentTemplate = 
+    $(go.Adornment, "Spot",
+      $(go.Panel, "Auto",
+        // this Adornment has a rectangular blue Shape around the selected node
+        $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
+        $(go.Placeholder, { margin: new go.Margin(10) })
+      ),
+      // and this Adornment has a Button to the right of the selected node
+      $("Button",
+
+        {
+          alignment: go.Spot.TopLeft,
+          alignmentFocus: go.Spot.TopLeft,
+          click: function(){alert(2);}  // define click behavior for this Button in the Adornment
+        },
+
+        $(go.Shape, "BpmnEventConditional",
+          { 
+            alignment:go.Spot.Center,
+            fill:"#fff",
+            stroke: "#fff",
+            margin:2,
+            cursor: "pointer",
+            desiredSize: new go.Size(14, 14),
+            cursor: "move",
+            fill: "lightblue",
+            click:function(e,obj){operate(obj.part);}
+          },
+        ),
+        // $(go.TextBlock, "+",  // the Button content
+        //   { font: "bold 8pt sans-serif" })
+      ),
+      $("Button",
+
+        {
+          alignment: go.Spot.TopRight,
+          alignmentFocus: go.Spot.TopRight,
+          click: function(e,obj){delNode(obj);}  // define click behavior for this Button in the Adornment
+        },
+
+        $(go.Shape, "ThinX",
+          { 
+            alignment:go.Spot.Center,
+            fill:"#fff",
+            stroke: "#fff",
+            margin:2,
+            cursor: "pointer",
+            desiredSize: new go.Size(14, 14),
+            cursor: "move",
+            fill: "lightblue",
+          },
+        ),
+        // $(go.TextBlock, "+",  // the Button content
+        //   { font: "bold 8pt sans-serif" })
+      )
+    );
+
   //节点
   myDiagram.nodeTemplateMap.add("",  // the default category
     $(go.Node, "Spot", nodeStyle(),
       // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
-      { selectionObjectName: "PANEL" },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Diamond'),
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("Start",  // the Start category
     $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL" },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Ellipse'),
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
       // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
-      { selectionObjectName: "PANEL" },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("Action",  // the Action category
     $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL" },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Rectangle'),
       nodeTemplate()
   ));
@@ -95,24 +151,7 @@
 
 	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
-  myDiagram.nodeTemplate.selectionAdornmentTemplate =
-    $(go.Adornment, "Spot",
-      $(go.Panel, "Auto",
-        // this Adornment has a rectangular blue Shape around the selected node
-        $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
-        $(go.Placeholder, { margin: new go.Margin(4, 4, 0, 4) })
-      ),
-      // and this Adornment has a Button to the right of the selected node
-      $("Button",
-        {
-          alignment: go.Spot.Right,
-          alignmentFocus: go.Spot.Left,
-          click: function(){alert(2);}  // define click behavior for this Button in the Adornment
-        },
-        $(go.TextBlock, "+",  // the Button content
-          { font: "bold 8pt sans-serif" })
-      )
-    );
+    
 
 	//调色板
 	var myPalette =
@@ -169,8 +208,10 @@
   function nodeTemplate(){
     return [
       $(go.Panel, "Auto",
-        {click:function(e, obj){ showIcon(e,obj); }},
-        { name: "PANEL" },
+        {
+          name: "PANEL" ,
+          click:function(e, obj){ showIcon(e,obj); }
+        },
         // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         $(go.Shape, 
           { 
@@ -191,38 +232,7 @@
            editable: true
           },
            new go.Binding("text").makeTwoWay()
-        ),
-        
-          
-          $(go.Shape, "BpmnEventConditional",
-            { 
-              portId:'icon-edit',
-              alignment:go.Spot.TopLeft,
-              fill:"#fff",
-              stroke: "#fff",
-              margin:2,
-              cursor: "pointer",
-              desiredSize: new go.Size(18, 18),
-              cursor: "move",
-              fill: "lightblue",
-              click:function(e,obj){operate(obj.part);}
-            },
-          ),
-          $(go.Shape, "ThinX",
-            { 
-              portId:'icon-del',
-              alignment:go.Spot.TopRight,
-              fill:"#fff",
-              stroke: "#fff",
-              margin:2,
-              cursor: "pointer",
-              desiredSize: new go.Size(18, 18),
-              cursor: "move",
-              fill: "lightblue",
-              click:function(e,obj){delNode(obj.part);}
-            },
-          ),
-      
+        )
         
       ),
 
@@ -244,6 +254,6 @@
       
   }
   function delNode(node){
-    myDiagram.remove(node);
+    // myDiagram.remove(node);
   }
 })()
