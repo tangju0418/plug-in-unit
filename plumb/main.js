@@ -1,12 +1,12 @@
 (function(){
 	var nodeDataArray = [
-		{ key: 1, category:"Start", "loc":"0 240", text: "start", shape: "Ellipse", color: "brown" },
-    { key: 2, category:"", "loc":"150 200", text: "question1", shape: "Diamond", color: "slateblue" },
-    { key: 3, category:"Action", "loc":"330 280", text: "action1", shape: "Rectangle", color: "orange" },
-    { key: 4, category:"", "loc":"350 100", text: "question2", shape: "Diamond", color: "slateblue" },
-    { key: 5, category:"End", "loc":"430 450",text: "dosomething", shape: "auto", color: "aquamarine" },
-    { key: 6, category:"Action", "loc":"700 250", text: "action2", shape: "Rectangle", color: "orange" },
-    { key: 7, category:"End", "loc":"650 400", text: "dosomething",shape: "auto", color: "aquamarine" }
+		{ key: 1, category:"Start", "loc":"0 240", "size":"80,80", text: "start", shape: "Ellipse", color: "brown" },
+    { key: 2, category:"", "loc":"150 200","size":"80,80", text: "question1", shape: "Diamond", color: "slateblue" },
+    { key: 3, category:"Action", "loc":"330 280","size":"80,80", text: "action1", shape: "Rectangle", color: "orange" },
+    { key: 4, category:"", "loc":"350 100","size":"80,80", text: "question2", shape: "Diamond", color: "slateblue" },
+    { key: 5, category:"End", "loc":"430 450","size":"80,80",text: "dosomething", shape: "auto", color: "aquamarine" },
+    { key: 6, category:"Action", "loc":"700 250","size":"80,80", text: "action2", shape: "Rectangle", color: "orange" },
+    { key: 7, category:"End", "loc":"650 400","size":"80,80", text: "dosomething",shape: "auto", color: "aquamarine" }
 	];
 	var linkDataArray = [
 		{ from: 1, to: 2},
@@ -24,25 +24,48 @@
       initialContentAlignment: go.Spot.Center,
       allowDrop: true,  
       "undoManager.isEnabled": true,
+       // resizingTool: new ResizeMultipleTool(),
       "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
     });
+  var nodeResizeAdornmentTemplate =
+    $(go.Adornment, "Spot",
+      { locationSpot: go.Spot.Right },
+      $(go.Placeholder),
+      $(go.Shape, { alignment: go.Spot.TopLeft, cursor: "nw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      // $(go.Shape, { alignment: go.Spot.Top, cursor: "n-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.TopRight, cursor: "ne-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+
+      // $(go.Shape, { alignment: go.Spot.Left, cursor: "w-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      // $(go.Shape, { alignment: go.Spot.Right, cursor: "e-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+
+      $(go.Shape, { alignment: go.Spot.BottomLeft, cursor: "se-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      // $(go.Shape, { alignment: go.Spot.Bottom, cursor: "s-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
+    );
+
   //节点
   myDiagram.nodeTemplateMap.add("",  // the default category
     $(go.Node, "Spot", nodeStyle(),
+      // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
+      { selectionObjectName: "PANEL" },
       nodeBg('Diamond'),
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("Start",  // the Start category
     $(go.Node, "Spot", nodeStyle(),
+      { selectionObjectName: "PANEL" },
       nodeBg('Ellipse'),
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
+      // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
+      { selectionObjectName: "PANEL" },
       nodeTemplate()
   ));
   myDiagram.nodeTemplateMap.add("Action",  // the Action category
     $(go.Node, "Spot", nodeStyle(),
+      { selectionObjectName: "PANEL" },
       nodeBg('Rectangle'),
       nodeTemplate()
   ));
@@ -72,6 +95,25 @@
 
 	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
+  myDiagram.nodeTemplate.selectionAdornmentTemplate =
+    $(go.Adornment, "Spot",
+      $(go.Panel, "Auto",
+        // this Adornment has a rectangular blue Shape around the selected node
+        $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
+        $(go.Placeholder, { margin: new go.Margin(4, 4, 0, 4) })
+      ),
+      // and this Adornment has a Button to the right of the selected node
+      $("Button",
+        {
+          alignment: go.Spot.Right,
+          alignmentFocus: go.Spot.Left,
+          click: function(){alert(2);}  // define click behavior for this Button in the Adornment
+        },
+        $(go.TextBlock, "+",  // the Button content
+          { font: "bold 8pt sans-serif" })
+      )
+    );
+
 	//调色板
 	var myPalette =
     $(go.Palette, "myPaletteDiv",  
@@ -96,7 +138,8 @@
       {
         locationSpot: go.Spot.Center,
         mouseEnter: function (e, obj) { showPorts(obj.part, true); },
-        mouseLeave: function (e, obj) { showPorts(obj.part, false); }
+        mouseLeave: function (e, obj) { showPorts(obj.part, false); },
+        
       }
     ];
   }
@@ -111,25 +154,24 @@
           toLinkable: true,
           cursor: "pointer",
           fill: "#ddd",
-          portId: 'nodeBg'
+          portId: 'nodeBg',
         },
+        // { name: "PANEL" },
+        // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}),
         new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),
       )
     
   }
 
-  function showPorts(node, show) {
-    var diagram = node.diagram;
-    if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
-    node.ports.each(function(port) {
-      port.fill = (show ? "#aaa" : '#ddd');
-    });
-  }
+ 
 
   function nodeTemplate(){
     return [
       $(go.Panel, "Auto",
+        {click:function(e, obj){ showIcon(e,obj); }},
+        { name: "PANEL" },
+        // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         $(go.Shape, 
           { 
             desiredSize: new go.Size(80, 80),
@@ -149,8 +191,59 @@
            editable: true
           },
            new go.Binding("text").makeTwoWay()
-        )
-      )
+        ),
+        
+          
+          $(go.Shape, "BpmnEventConditional",
+            { 
+              portId:'icon-edit',
+              alignment:go.Spot.TopLeft,
+              fill:"#fff",
+              stroke: "#fff",
+              margin:2,
+              cursor: "pointer",
+              desiredSize: new go.Size(18, 18),
+              cursor: "move",
+              fill: "lightblue",
+              click:function(e,obj){operate(obj.part);}
+            },
+          ),
+          $(go.Shape, "ThinX",
+            { 
+              portId:'icon-del',
+              alignment:go.Spot.TopRight,
+              fill:"#fff",
+              stroke: "#fff",
+              margin:2,
+              cursor: "pointer",
+              desiredSize: new go.Size(18, 18),
+              cursor: "move",
+              fill: "lightblue",
+              click:function(e,obj){delNode(obj.part);}
+            },
+          ),
+      
+        
+      ),
+
     ];
+  }
+  function showIcon(node){
+    console.log(node)
+
+  }
+  function showPorts(node, show) {
+    var diagram = node.diagram;
+    if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
+    node.ports.each(function(port) {
+      port.fill = (show ? "#aaa" : '#ddd');
+    });
+  }
+
+  function operate(e, obj){
+      
+  }
+  function delNode(node){
+    myDiagram.remove(node);
   }
 })()
