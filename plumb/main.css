@@ -35,6 +35,50 @@ body{
 	z-index:2;
 	overflow: hidden;
 }
+#edit-content{
+        display: none;
+}
+.mask{
+        position: fixed;
+        width: 100%;
+        top:0;
+        bottom:0;
+        z-index:3;
+        background-color:#000;
+        opacity: 0.5;
+}
+.content-box{
+        position: fixed;
+        width: 350px;
+        height: 100px;
+        top:30px;
+        left:0;
+        right:0;
+        margin: 0 auto;
+        background-color:#fff;
+        z-index: 4;
+}
+#content-title{
+        margin:5px 10px;
+}
+#content-del{
+        margin-left:20px;
+        font-size:12px;
+}
+#content-text{
+        display: none;
+        width: 88%;
+        margin:0 auto;
+        font-size:15px;
+        height:24px;
+}
+#content-text:focus{
+        background-color:lightblue;
+}
+#btn-ok,#btn-cancel{
+        margin:10px;
+        float:right;
+}
 @media screen and (max-width: 600px) {
         .content{
                 width:100%; 

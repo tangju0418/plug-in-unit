@@ -45,57 +45,43 @@
   var nodeSelectionAdornmentTemplate = 
     $(go.Adornment, "Spot",
       $(go.Panel, "Auto",
-        // this Adornment has a rectangular blue Shape around the selected node
         $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
-        $(go.Placeholder, { margin: new go.Margin(10) })
+        $(go.Placeholder)
       ),
-      // and this Adornment has a Button to the right of the selected node
+      // and this Adornment has two Button of the selected node
       $("Button",
-
         {
+          cursor: "pointer",
           alignment: go.Spot.TopLeft,
           alignmentFocus: go.Spot.TopLeft,
-          click: function(){alert(2);}  // define click behavior for this Button in the Adornment
+          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
         },
 
         $(go.Shape, "BpmnEventConditional",
           { 
             alignment:go.Spot.Center,
             fill:"#fff",
-            stroke: "#fff",
-            margin:2,
-            cursor: "pointer",
+            stroke: "#000",
             desiredSize: new go.Size(14, 14),
-            cursor: "move",
-            fill: "lightblue",
-            click:function(e,obj){operate(obj.part);}
           },
-        ),
-        // $(go.TextBlock, "+",  // the Button content
-        //   { font: "bold 8pt sans-serif" })
+        )
       ),
       $("Button",
-
         {
+          cursor: "pointer",
           alignment: go.Spot.TopRight,
           alignmentFocus: go.Spot.TopRight,
-          click: function(e,obj){delNode(obj);}  // define click behavior for this Button in the Adornment
+          click: function(e,obj){editPanel(obj.part,'del');}  // define click behavior for this Button in the Adornment
         },
 
         $(go.Shape, "ThinX",
           { 
             alignment:go.Spot.Center,
             fill:"#fff",
-            stroke: "#fff",
-            margin:2,
-            cursor: "pointer",
+            stroke: "#000",
             desiredSize: new go.Size(14, 14),
-            cursor: "move",
-            fill: "lightblue",
           },
-        ),
-        // $(go.TextBlock, "+",  // the Button content
-        //   { font: "bold 8pt sans-serif" })
+        )
       )
     );
 
@@ -175,11 +161,13 @@
     return [
       new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
       {
+        name: "PANEL" ,
         locationSpot: go.Spot.Center,
         mouseEnter: function (e, obj) { showPorts(obj.part, true); },
         mouseLeave: function (e, obj) { showPorts(obj.part, false); },
         
-      }
+      },
+      new go.Binding("text")
     ];
   }
 
@@ -209,8 +197,7 @@
     return [
       $(go.Panel, "Auto",
         {
-          name: "PANEL" ,
-          click:function(e, obj){ showIcon(e,obj); }
+          // name: "PANEL" ,
         },
         // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         $(go.Shape, 
@@ -238,10 +225,7 @@
 
     ];
   }
-  function showIcon(node){
-    console.log(node)
 
-  }
   function showPorts(node, show) {
     var diagram = node.diagram;
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
@@ -250,10 +234,43 @@
     });
   }
 
-  function operate(e, obj){
-      
-  }
-  function delNode(node){
-    // myDiagram.remove(node);
+  function editPanel(node, str){
+    var editContent = document.getElementById("edit-content");
+    var contentTitle = document.getElementById("content-title");
+    var contentText = document.getElementById("content-text");
+    var contentDel = document.getElementById("content-del");
+    var btnCancel = document.getElementById("btn-cancel");
+    var btnOk = document.getElementById("btn-ok");
+
+    var oldNode = node.adornedPart
+    console.log(oldNode);
+    editContent.style.display = 'block';
+    if(str == 'del'){
+      contentText.style.display = 'none';
+      contentDel.style.display = 'block';
+      contentTitle.innerHTML = 'Please Confirm';
+      contentDel.innerHTML = "Delete '" + oldNode.text + "'?";
+    }else{
+      contentText.style.display = 'block';
+      contentDel.style.display = 'none';
+      contentTitle.innerHTML = 'Edit '+ oldNode.category +' name';
+      contentText.value = oldNode.text;
+    }
+    btnOk.addEventListener('click', function(){
+      editContent.style.display = 'none';
+      contentText.style.display = 'none';
+      contentDel.style.display = 'none';
+      if(str == 'del'){
+        myDiagram.remove(oldNode);
+      }else{
+        
+      } 
+    })
+    btnCancel.addEventListener('click', function(){
+      editContent.style.display = 'none';
+      contentText.style.display = 'none';
+      contentDel.style.display = 'none';
+    })
+
   }
 })()
