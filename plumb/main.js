@@ -1,12 +1,13 @@
 (function(){
+  var btnConfirm = true
 	var nodeDataArray = [
-		{ key: 1, category:"Start", "loc":"0 240", "size":"80,80", text: "start", shape: "Ellipse", color: "brown" },
-    { key: 2, category:"", "loc":"150 200","size":"80,80", text: "question1", shape: "Diamond", color: "slateblue" },
-    { key: 3, category:"Action", "loc":"330 280","size":"80,80", text: "action1", shape: "Rectangle", color: "orange" },
-    { key: 4, category:"", "loc":"350 100","size":"80,80", text: "question2", shape: "Diamond", color: "slateblue" },
-    { key: 5, category:"End", "loc":"430 450","size":"80,80",text: "dosomething", shape: "auto", color: "aquamarine" },
-    { key: 6, category:"Action", "loc":"700 250","size":"80,80", text: "action2", shape: "Rectangle", color: "orange" },
-    { key: 7, category:"End", "loc":"650 400","size":"80,80", text: "dosomething",shape: "auto", color: "aquamarine" }
+		{ key: 1, category:"Start",    "loc":"0 240",   "size":"80 80",   "bgSize":"100 100", text: "start",       shape: "Ellipse",   color: "brown" },
+    { key: 2, category:"Question", "loc":"150 200", "size":"120 120", "bgSize":"140 140", text: "question1",   shape: "Diamond",   color: "slateblue" },
+    { key: 3, category:"Action",   "loc":"330 280", "size":"80 80",   "bgSize":"100 100", text: "action1",     shape: "Rectangle", color: "orange" },
+    { key: 4, category:"Question", "loc":"350 100", "size":"120 120", "bgSize":"140 140", text: "question2",   shape: "Diamond",   color: "slateblue" },
+    { key: 5, category:"End",      "loc":"430 450", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "aquamarine" },
+    { key: 6, category:"Action",   "loc":"700 250", "size":"80 80",   "bgSize":"100 100", text: "action2",     shape: "Rectangle", color: "orange" },
+    { key: 7, category:"End",      "loc":"650 400", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "aquamarine" }
 	];
 	var linkDataArray = [
 		{ from: 1, to: 2},
@@ -26,22 +27,18 @@
       "undoManager.isEnabled": true,
       "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
     });
+
   var nodeResizeAdornmentTemplate =
     $(go.Adornment, "Spot",
       { locationSpot: go.Spot.Right },
       $(go.Placeholder),
       $(go.Shape, { alignment: go.Spot.TopLeft, cursor: "nw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
-      // $(go.Shape, { alignment: go.Spot.Top, cursor: "n-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
       $(go.Shape, { alignment: go.Spot.TopRight, cursor: "ne-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
-
-      // $(go.Shape, { alignment: go.Spot.Left, cursor: "w-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
-      // $(go.Shape, { alignment: go.Spot.Right, cursor: "e-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
-
       $(go.Shape, { alignment: go.Spot.BottomLeft, cursor: "se-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
-      // $(go.Shape, { alignment: go.Spot.Bottom, cursor: "s-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
       $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
     );
 
+  //选中node显示button
   var nodeSelectionAdornmentTemplate = 
     $(go.Adornment, "Spot",
       $(go.Panel, "Auto",
@@ -56,7 +53,6 @@
           alignmentFocus: go.Spot.TopLeft,
           click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
         },
-
         $(go.Shape, "BpmnEventConditional",
           { 
             alignment:go.Spot.Center,
@@ -73,7 +69,6 @@
           alignmentFocus: go.Spot.TopRight,
           click: function(e,obj){editPanel(obj.part,'del');}  // define click behavior for this Button in the Adornment
         },
-
         $(go.Shape, "ThinX",
           { 
             alignment:go.Spot.Center,
@@ -85,26 +80,38 @@
       )
     );
 
-  //节点
-  myDiagram.nodeTemplateMap.add("",  // the default category
+
+  //按category分别建立节点
+  myDiagram.nodeTemplateMap.add("Start",  // the Start category
+    $(go.Node, "Spot",
+      new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+      {
+        locationSpot: go.Spot.Center,
+        mouseEnter: function (e, obj) { obj.part.ports.each(function(port) {
+          port.fill = "#aaa"}); },
+        mouseLeave: function (e, obj) { obj.part.ports.each(function(port) {
+          port.fill = "#ddd"}); },
+      },
+      nodeBg('Ellipse'),
+      nodeTemplate()
+  ));
+
+  myDiagram.nodeTemplateMap.add("Question",  // the default category
     $(go.Node, "Spot", nodeStyle(),
       // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Diamond'),
       nodeTemplate()
   ));
-  myDiagram.nodeTemplateMap.add("Start",  // the Start category
-    $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
-      nodeBg('Ellipse'),
-      nodeTemplate()
-  ));
+
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
       // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
+      nodeBg('Rectangle'),
       nodeTemplate()
   ));
+
   myDiagram.nodeTemplateMap.add("Action",  // the Action category
     $(go.Node, "Spot", nodeStyle(),
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
@@ -145,9 +152,9 @@
       {
         nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
         model: new go.GraphLinksModel([ 
-        { category:"", text: "Question", shape: "Diamond", color: "slateblue" },
-        { category:"Action", text: "Action", shape: "Rectangle", color: "orange" },
-        { category:"End", text: "Output",shape: "auto", color: "aquamarine" }
+          { category:"Action",   "size":"80 80",   "bgSize":"100 100", text: "Action",   shape: "Rectangle", color: "orange" },
+          { category:"Question", "size":"120 120", "bgSize":"140 140", text: "Question", shape: "Diamond",   color: "slateblue" },
+          { category:"End",      "size":"100 60",  "bgSize":"100 60",  text: "Output",   shape: "auto",      color: "aquamarine" }
         ])
       });
 
@@ -157,26 +164,26 @@
     $(go.Overview, "myOverviewDiv",
       { observed: myDiagram });
 
+  //node的属性及方法
   function nodeStyle() {
     return [
       new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+      new go.Binding("text").makeTwoWay(),
       {
         name: "PANEL" ,
         locationSpot: go.Spot.Center,
         mouseEnter: function (e, obj) { showPorts(obj.part, true); },
         mouseLeave: function (e, obj) { showPorts(obj.part, false); },
-        
-      },
-      new go.Binding("text")
+      }
     ];
   }
 
+  //node用来增加连线的子面板
   function nodeBg( shape) {
     return $(go.Shape, shape,
         { 
           stroke: null,
           alignment:go.Spot.Center,
-          desiredSize: new go.Size(100, 100),
           fromLinkable: true, 
           toLinkable: true,
           cursor: "pointer",
@@ -184,7 +191,7 @@
           portId: 'nodeBg',
         },
         // { name: "PANEL" },
-        // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+        new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),
         new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}),
         new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),
       )
@@ -192,20 +199,19 @@
   }
 
  
-
+  //node展示内容的子面板
   function nodeTemplate(){
     return [
       $(go.Panel, "Auto",
-        {
-          // name: "PANEL" ,
-        },
+        // { name: "PANEL" },
         // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         $(go.Shape, 
           { 
-            desiredSize: new go.Size(80, 80),
             cursor: "move",
             fill: "lightblue"
           },
+          new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
+          new go.Binding("cursor", "category",function(v){ return (v == 'Start' ? 'pointer' : 'move')}),
           new go.Binding("figure", "shape"),
           new go.Binding("fill", "color")),
         $(go.TextBlock,
@@ -214,9 +220,7 @@
            text:"textAlign:'center'",
            margin: 6, 
            stroke: "black", 
-           font: "bold 14px sans-serif" ,
-           // wrap:go.TextBlock.WrapFit,
-           editable: true
+           font: "bold 14px sans-serif" 
           },
            new go.Binding("text").makeTwoWay()
         )
@@ -226,6 +230,7 @@
     ];
   }
 
+  //鼠标进入node，子面板颜色变化
   function showPorts(node, show) {
     var diagram = node.diagram;
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
@@ -234,6 +239,7 @@
     });
   }
 
+  //编辑node的方法
   function editPanel(node, str){
     var editContent = document.getElementById("edit-content");
     var contentTitle = document.getElementById("content-title");
@@ -243,9 +249,14 @@
     var btnOk = document.getElementById("btn-ok");
 
     var oldNode = node.adornedPart
-    console.log(oldNode);
-    editContent.style.display = 'block';
+
     if(str == 'del'){
+      btnConfirm = true
+    }else{
+      btnConfirm = false
+    }
+    editContent.style.display = 'block';
+    if( btnConfirm ){
       contentText.style.display = 'none';
       contentDel.style.display = 'block';
       contentTitle.innerHTML = 'Please Confirm';
@@ -260,10 +271,10 @@
       editContent.style.display = 'none';
       contentText.style.display = 'none';
       contentDel.style.display = 'none';
-      if(str == 'del'){
+      if( btnConfirm ){
         myDiagram.remove(oldNode);
       }else{
-        
+        myDiagram.model.setDataProperty(oldNode,'text',contentText.value);
       } 
     })
     btnCancel.addEventListener('click', function(){
@@ -271,6 +282,5 @@
       contentText.style.display = 'none';
       contentDel.style.display = 'none';
     })
-
   }
 })()
