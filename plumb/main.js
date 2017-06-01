@@ -163,7 +163,95 @@
   //设置model
 	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
-    
+  myDiagram.add(
+    $(go.Part,
+      {
+        layerName: "Foreground", 
+        _viewPosition: new go.Point(10,10),
+        selectable:false
+      },
+      $("Button",
+        {
+          cursor: "pointer",
+          alignment: go.Spot.TopLeft,
+          alignmentFocus: go.Spot.TopLeft,
+          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
+        },
+        $(go.Shape, "BpmnEventConditional",
+          { 
+            alignment:go.Spot.Center,
+            fill:"#fff",
+            stroke: "#000",
+            desiredSize: new go.Size(14, 14),
+          },
+        )
+      )
+    )
+  );
+  myDiagram.add(
+    $(go.Part,
+      {
+        layerName: "Foreground", 
+        _viewPosition: new go.Point(40,10),
+        selectable:false
+      },
+      $("Button",
+        {
+          cursor: "pointer",
+          alignment: go.Spot.TopLeft,
+          alignmentFocus: go.Spot.TopLeft,
+          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
+        },
+        $(go.Shape, "BpmnEventConditional",
+          { 
+            alignment:go.Spot.Center,
+            fill:"#fff",
+            stroke: "#000",
+            desiredSize: new go.Size(14, 14),
+          },
+        )
+      )
+    )
+  );
+  myDiagram.add(
+    $(go.Part,
+      {
+        layerName: "Foreground", 
+        _viewPosition: new go.Point(70,10),
+        selectable:false
+      },
+      $("Button",
+        {
+          cursor: "pointer",
+          alignment: go.Spot.TopLeft,
+          alignmentFocus: go.Spot.TopLeft,
+          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
+        },
+        $(go.Shape, "BpmnEventConditional",
+          { 
+            alignment:go.Spot.Center,
+            fill:"#fff",
+            stroke: "#000",
+            desiredSize: new go.Size(14, 14),
+          },
+        )
+      )
+    )
+  );
+  myDiagram.addDiagramListener("ViewportBoundsChanged", function(e) {
+    var dia = e.diagram;
+    console.log(dia)
+    // dia.startTransaction("fix Parts");
+    // only iterates through simple Parts in the diagram, not Nodes or Links
+    dia.parts.each(function(part) {
+      // and only on those that have the "_viewPosition" property set to a Point
+      if (part._viewPosition) {
+        part.position = dia.transformViewToDoc(part._viewPosition);
+        part.scale = 1/dia.scale;
+      }
+    });
+    // dia.commitTransaction("fix Parts");
+  });
 
 	//调色板
 	var myPalette =
