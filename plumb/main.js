@@ -10,15 +10,16 @@
     { key: 7, category:"End",      "loc":"650 400", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "aquamarine" }
 	];
 	var linkDataArray = [
-		{ from: 1, to: 2},
-    { from: 2, to: 3, text: "yes" },
-    { from: 2, to: 4, text: "no" },
-    { from: 3, to: 5, text: "dosomething" },
-    { from: 4, to: 6, text: "yes" },
-    { from: 6, to: 5, text: "yes" },
-    { from: 6, to: 7, text: "no"}
+    { category:"Start", from: 1, to: 2},
+    { category:"", from: 2, to: 3, text: "yes" },
+    { category:"", from: 2, to: 4, text: "no" },
+    { category:"", from: 3, to: 5, text: "dosomething" },
+    { category:"", from: 4, to: 6, text: "yes" },
+    { category:"", from: 6, to: 5, text: "yes" },
+    { category:"", from: 6, to: 7, text: "no"}
 	];
 	var $ = go.GraphObject.make;
+
 	var myDiagram =
   	$(go.Diagram, "myDiagramDiv",
     {
@@ -119,29 +120,47 @@
       nodeTemplate()
   ));
 
-	//连线
-	myDiagram.linkTemplate =
-	  $(go.Link,
-	    { routing: go.Link.AvoidsNodes, corner: 5 },
-	    $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
-	    $(go.Shape,  {
-	    	toArrow:'OpenTriangle',
-	    	fill:null, 
-	    	stroke: "#ca221f",
-	    	strokeWidth:2 }),
-	    $(go.Panel, "Auto",
-          $(go.Shape, { fill: "#fff",strokeWidth:0 }),
-          $(go.TextBlock, "?", {
-           		margin: 5 ,
-           		editable: true
-       		},
-          new go.Binding("text")),
-          new go.Binding("segmentIndex").makeTwoWay(),
-          new go.Binding("segmentFraction").makeTwoWay()
+	//按category分别建立连线
+  myDiagram.linkTemplateMap.add("Start",
+    $(go.Link,
+      { routing: go.Link.AvoidsNodes, corner: 5 },
+      $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
+      $(go.Shape,  {
+        toArrow:'OpenTriangle',
+        fill:null, 
+        stroke: "#ca221f",
+        strokeWidth:2 }
+      )
+    )
+  );
+  myDiagram.linkTemplateMap.add("",
+    $(go.Link,
+      { routing: go.Link.AvoidsNodes, corner: 5 },
+      new go.Binding("text").makeTwoWay(),
+      $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
+      $(go.Shape,  {
+        toArrow:'OpenTriangle',
+        fill:null, 
+        stroke: "#ca221f",
+        strokeWidth:2 }
+      ),
+      $(go.Panel, "Auto",
+        {
+          click:function(e,obj){editPanel(obj.part,'link');}
+        },
+        $(go.Shape, { fill: "#fff",strokeWidth:0 }),
+        $(go.TextBlock, "?", {
+            margin: 5 
+          },
+          new go.Binding("text").makeTwoWay()
         ),
-       new go.Binding("show",'from',function(v){return v != 1}),
-	); 
-
+        new go.Binding("segmentIndex").makeTwoWay(),
+        new go.Binding("segmentFraction").makeTwoWay()
+      )
+    )
+  );
+	
+  //设置model
 	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
     
@@ -239,7 +258,7 @@
     });
   }
 
-  //编辑node的方法
+  //编辑node及link的方法
   function editPanel(node, str){
     var editContent = document.getElementById("edit-content");
     var contentTitle = document.getElementById("content-title");
@@ -248,13 +267,19 @@
     var btnCancel = document.getElementById("btn-cancel");
     var btnOk = document.getElementById("btn-ok");
 
-    var oldNode = node.adornedPart
+    var oldNode = null;
 
     if(str == 'del'){
       btnConfirm = true
+      oldNode = node.adornedPart
+    }else if(str == 'update'){
+      btnConfirm = false
+      oldNode = node.adornedPart
     }else{
       btnConfirm = false
+      oldNode = node
     }
+
     editContent.style.display = 'block';
     if( btnConfirm ){
       contentText.style.display = 'none';
@@ -264,8 +289,12 @@
     }else{
       contentText.style.display = 'block';
       contentDel.style.display = 'none';
-      contentTitle.innerHTML = 'Edit '+ oldNode.category +' name';
       contentText.value = oldNode.text;
+      if(str == 'update'){
+        contentTitle.innerHTML = 'Edit '+ oldNode.category +' name';
+      }else{
+        contentTitle.innerHTML = 'Enter Text';
+      }
     }
     btnOk.addEventListener('click', function(){
       editContent.style.display = 'none';
