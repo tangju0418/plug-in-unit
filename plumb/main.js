@@ -23,7 +23,7 @@
 
 	var myDiagram =
   	$(go.Diagram, "myDiagramDiv",
-    {
+    { 
       initialContentAlignment: go.Spot.Center,
       allowDrop: true,  
       "undoManager.isEnabled": true,
@@ -186,7 +186,6 @@
         _viewPosition: new go.Point(50,20),
         selectionAdorned: false, 
         selectionChanged:changePart
-        // click: function(e,obj){moving(obj.part);}
       },
       part("M17.5 4c1.381 0 2.5 1.119 2.5 2.5 0 0.563-0.186 1.082-0.5 1.5l-1 1-3.5-3.5 1-1c0.418-0.314 0.937-0.5 1.5-0.5zM5 15.5l-1 4.5 4.5-1 9.25-9.25-3.5-3.5-9.25 9.25zM15.181 9.681l-7 7-0.862-0.862 7-7 0.862 0.862z",0)
     )
@@ -205,6 +204,28 @@
       part("M32 18.451l-16-12.42-16 12.42v-5.064l16-12.42 16 12.42zM28 18v12h-8v-8h-8v8h-8v-12l12-9z",4)   
     )
   );
+
+
+  // myDiagram.add(
+  //   $(go.Part,
+  //     {
+  //       layerName: "Foreground", 
+  //       _viewPosition: new go.Point(0,0),
+  //       height:600,
+  //       selectionAdorned: false, 
+  //       // selectionChanged:changeBar
+  //     },
+  //     $(go.Shape, { 
+  //       width: 15, 
+  //       margin: 2, 
+  //       fill: "#f3f3f3", 
+  //       stroke: null,
+  //       stretch: go.GraphObject.Fill 
+  //     })
+  //   )
+  // );
+
+
 
   //保持左上角图标位置不变
   myDiagram.addDiagramListener("ViewportBoundsChanged", function(e) {
@@ -394,6 +415,7 @@
     })
   }
 
+  //左上角图标选择改变颜色
   function changePart(node){
     var iconBg = node.findObject("iconBg");
     var shape = node.findObject("shape");
@@ -416,4 +438,6 @@
   function load() {
     myDiagram.model = go.Model.fromJson({nodeDataArray,linkDataArray});
   }
+
+
 })()

@@ -5,6 +5,7 @@ body{
         font-family: sans-serif;
 }
 .content{
+        position: relative;
 	width:80%; 
 	height:600px; 
 	margin:0 auto;
@@ -15,12 +16,43 @@ body{
 	background-color: #fff;
 	border:1px solid #f3f3f3;
 }
+#topBar,#bottomBar{
+        position: absolute;
+        left:180px;
+        right:0;
+        height:15px;
+        z-index: 5;
+        background-color:Azure;
+}
+#topBar{
+        top:0;
+}
+#bottomBar{
+        bottom:0;
+}
+#leftBar,#rightBar{
+        position: absolute;
+        width:15px;
+        top:0;
+        bottom:0;
+        z-index: 5;
+        background-color:Azure;
+}
+
+#leftBar{
+    left:180px;    
+}
+#rightBar{
+        right:0;
+}
+#topBar:hover,#bottomBar:hover,#leftBar:hover,#rightBar:hover{
+        background-color:#3077b9;
+}
 #myPaletteDiv{
 	position: absolute;
 	width:180px;
 	height:600px;
 	top:0;
-	left:10%;
 	background-color: #84acb3;
 }
 #myOverviewDiv{
