@@ -18,6 +18,7 @@
     { category:"", from: 6, to: 5, text: "yes" },
     { category:"", from: 6, to: 7, text: "no"}
 	];
+
 	var $ = go.GraphObject.make;
 
 	var myDiagram =
@@ -54,13 +55,13 @@
           alignmentFocus: go.Spot.TopLeft,
           click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
         },
-        $(go.Shape, "BpmnEventConditional",
+        $(go.Shape,
           { 
+            geometryString:"M22.443 12.15l-11.286 11.3-2.606-2.606 11.292-11.294 2.6 2.6zM23.15 11.443l-2.599-2.599 1.727-1.728c0.391-0.391 1.024-0.388 1.417 0.003l1.18 1.177c0.392 0.391 0.395 1.025 0.005 1.416l-1.729 1.731zM7.904 21.611l2.495 2.495-3.135 0.617 0.64-3.113zM7 21l-1 5 5-1 14.58-14.58c0.784-0.784 0.786-2.054 0.010-2.83l-1.18-1.179c-0.779-0.779-2.037-0.783-2.83 0.010l-14.58 14.58z",
             alignment:go.Spot.Center,
-            fill:"#fff",
-            stroke: "#000",
+            stroke:"#000",
             desiredSize: new go.Size(14, 14),
-          },
+          }
         )
       ),
       $("Button",
@@ -163,85 +164,51 @@
   //设置model
 	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
+
+  //移动按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(10,10),
-        selectable:false
+        _viewPosition: new go.Point(20,20),
+        selectionAdorned: false, 
+        selectionChanged:changePart
       },
-      $("Button",
-        {
-          cursor: "pointer",
-          alignment: go.Spot.TopLeft,
-          alignmentFocus: go.Spot.TopLeft,
-          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
-        },
-        $(go.Shape, "BpmnEventConditional",
-          { 
-            alignment:go.Spot.Center,
-            fill:"#fff",
-            stroke: "#000",
-            desiredSize: new go.Size(14, 14),
-          },
-        )
-      )
+      part("M17.984 5.921v8.063h8v-4l6.016 6.016-6.016 6.015v-4.093h-8v8.063h4.031l-6.015 6.015-6.016-6.015h4v-8.063h-8v4.062l-5.984-5.984 5.984-5.984v3.968h8v-8.063h-3.906l5.922-5.921 5.922 5.921h-3.938z",4)  
     )
   );
+
+  //编辑按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(40,10),
-        selectable:false
+        _viewPosition: new go.Point(50,20),
+        selectionAdorned: false, 
+        selectionChanged:changePart
+        // click: function(e,obj){moving(obj.part);}
       },
-      $("Button",
-        {
-          cursor: "pointer",
-          alignment: go.Spot.TopLeft,
-          alignmentFocus: go.Spot.TopLeft,
-          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
-        },
-        $(go.Shape, "BpmnEventConditional",
-          { 
-            alignment:go.Spot.Center,
-            fill:"#fff",
-            stroke: "#000",
-            desiredSize: new go.Size(14, 14),
-          },
-        )
-      )
+      part("M17.5 4c1.381 0 2.5 1.119 2.5 2.5 0 0.563-0.186 1.082-0.5 1.5l-1 1-3.5-3.5 1-1c0.418-0.314 0.937-0.5 1.5-0.5zM5 15.5l-1 4.5 4.5-1 9.25-9.25-3.5-3.5-9.25 9.25zM15.181 9.681l-7 7-0.862-0.862 7-7 0.862 0.862z",0)
     )
   );
+
+  //复位按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(70,10),
-        selectable:false
+        _viewPosition: new go.Point(80,20),
+        selectionAdorned: false, 
+        selectionChanged:changePart,
+        click: load
       },
-      $("Button",
-        {
-          cursor: "pointer",
-          alignment: go.Spot.TopLeft,
-          alignmentFocus: go.Spot.TopLeft,
-          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
-        },
-        $(go.Shape, "BpmnEventConditional",
-          { 
-            alignment:go.Spot.Center,
-            fill:"#fff",
-            stroke: "#000",
-            desiredSize: new go.Size(14, 14),
-          },
-        )
-      )
+      part("M32 18.451l-16-12.42-16 12.42v-5.064l16-12.42 16 12.42zM28 18v12h-8v-8h-8v8h-8v-12l12-9z",4)   
     )
   );
+
+  //保持左上角图标位置不变
   myDiagram.addDiagramListener("ViewportBoundsChanged", function(e) {
     var dia = e.diagram;
-    console.log(dia)
-    // dia.startTransaction("fix Parts");
     // only iterates through simple Parts in the diagram, not Nodes or Links
     dia.parts.each(function(part) {
       // and only on those that have the "_viewPosition" property set to a Point
@@ -250,8 +217,8 @@
         part.scale = 1/dia.scale;
       }
     });
-    // dia.commitTransaction("fix Parts");
   });
+
 
 	//调色板
 	var myPalette =
@@ -274,11 +241,12 @@
   //node的属性及方法
   function nodeStyle() {
     return [
-      new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
+      new go.Binding("location", "loc", go.Point.parse),
       new go.Binding("text").makeTwoWay(),
       {
         name: "PANEL" ,
         locationSpot: go.Spot.Center,
+        cursor:"pointer",
         mouseEnter: function (e, obj) { showPorts(obj.part, true); },
         mouseLeave: function (e, obj) { showPorts(obj.part, false); },
       }
@@ -293,7 +261,6 @@
           alignment:go.Spot.Center,
           fromLinkable: true, 
           toLinkable: true,
-          cursor: "pointer",
           fill: "#ddd",
           portId: 'nodeBg',
         },
@@ -337,11 +304,37 @@
     ];
   }
 
+  //左上角图标
+  function part(str,num){
+    return [
+      $(go.Shape,'Rectangle',
+        { 
+          name: 'iconBg',
+          desiredSize: new go.Size(24, 24),
+          fill:"#fff",
+          stroke:"#4a86a2",
+          cursor: "pointer",
+        }
+      ),
+      $(go.Shape,
+        { 
+          name: 'shape',
+          geometryString:str,
+          alignment:go.Spot.Center, 
+          stroke:"#4a86a2",
+          margin:num,
+          cursor: "pointer",
+          desiredSize: new go.Size(16, 16),
+        }
+      )
+    ];
+  }
   //鼠标进入node，子面板颜色变化
   function showPorts(node, show) {
     var diagram = node.diagram;
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
     node.ports.each(function(port) {
+      
       port.fill = (show ? "#aaa" : '#ddd');
     });
   }
@@ -399,5 +392,28 @@
       contentText.style.display = 'none';
       contentDel.style.display = 'none';
     })
+  }
+
+  function changePart(node){
+    var iconBg = node.findObject("iconBg");
+    var shape = node.findObject("shape");
+    
+    if (iconBg !== null) {
+      if(node.isSelected)
+        iconBg.fill = "#4a86a2";
+      else
+        iconBg.fill = "#fff";
+    }
+    if (shape !== null) {
+      if(node.isSelected)
+        shape.stroke = "#fff";
+      else
+        shape.stroke = "#4a86a2";
+    }
+  }
+
+  //复位方法
+  function load() {
+    myDiagram.model = go.Model.fromJson({nodeDataArray,linkDataArray});
   }
 })()
