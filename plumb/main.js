@@ -1,5 +1,14 @@
 (function(){
-  var btnConfirm = true
+  //nodeDataArray：图表中node数组
+
+  //key: 连线使用的标识
+  //category ：用来区分不同类型的node
+  //loc: node的位置
+  //size: node文字面板的尺寸
+  //bgSize： node可增加连线面板的尺寸
+  //text: node中显示文字
+  //shape: node显示形状
+  //color: node文字面板的颜色
   var nodeDataArray = [
     { key: 1, category:"Start",    "loc":"0 240",   "size":"80 50",   "bgSize":"100 70",  text: "start",       shape: "Ellipse",   color: "#4f6f7e" },
     { key: 2, category:"Question", "loc":"150 200", "size":"120 120", "bgSize":"140 140", text: "question1",   shape: "Diamond",   color: "#4f6f7e" },
@@ -9,6 +18,13 @@
     { key: 6, category:"Action",   "loc":"700 250", "size":"80 80",   "bgSize":"100 100", text: "action2",     shape: "Rectangle", color: "#4f6f7e" },
     { key: 7, category:"End",      "loc":"650 400", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "#4f6f7e" }
   ];
+
+  //linkDataArray：图表中link数组
+
+  //category ：用来区分不同类型的link
+  //from: key值相同的node为连线起点
+  //to: key值相同的node为连线终点
+  //text： link中的文字描述
   var linkDataArray = [
     { category:"Start", from: 1, to: 2},
     { category:"", from: 2, to: 3, text: "yes" },
@@ -24,22 +40,22 @@
 
   //create a Diagram
   var myDiagram =
-    $(go.Diagram, "myDiagramDiv",
+    $(go.Diagram, "myDiagramDiv", 
     {
-      initialContentAlignment: go.Spot.Center,
-      allowDrop: true,  
-      "undoManager.isEnabled": true,
-      "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
+      initialContentAlignment: go.Spot.Center,  //初始化图表的位置
+      allowDrop: true,  //接收调色板拖入的node
+      "undoManager.isEnabled": true, //可以用键盘快捷键复制、粘贴、删除node
+      "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom, //鼠标滚轮缩放图表
     });
 
   //选中node显示button
   var nodeSelectionAdornmentTemplate = 
-    $(go.Adornment, "Spot",
+    $(go.Adornment, "Spot",  // this Adornment has two Button of the selected node
       $(go.Panel, "Auto",
         $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
         $(go.Placeholder)
       ),
-      // this Adornment has two Button of the selected node
+      //编辑node按钮
       $("Button",
         {
           cursor: "pointer",
@@ -56,6 +72,7 @@
           }
         )
       ),
+      //删除node按钮
       $("Button",
         {
           cursor: "pointer",
@@ -92,21 +109,21 @@
 
   myDiagram.nodeTemplateMap.add("Question",  // the default category
     $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
-      nodeBg('Diamond'),
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
+      nodeBg('Diamond'), 
       nodeTemplate()
   ));
 
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
       nodeBg('Rectangle'),
       nodeTemplate()
   ));
 
   myDiagram.nodeTemplateMap.add("Action",  // the Action category
     $(go.Node, "Spot", nodeStyle(),
-      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
+      { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
       nodeBg('Rectangle'),
       nodeTemplate()
   ));
@@ -141,18 +158,16 @@
           click:function(e,obj){editLinkPanel(obj.part);}
         },
         $(go.Shape, { fill: "#fff",strokeWidth:0 }),
-        $(go.TextBlock, "?", {
+        $(go.TextBlock, "?", { //连线中的文字默认显示"?"
             margin: 5 
           },
-          new go.Binding("text").makeTwoWay()
-        ),
-        new go.Binding("segmentIndex").makeTwoWay(),
-        new go.Binding("segmentFraction").makeTwoWay()
+          new go.Binding("text").makeTwoWay() //双向绑定显示linkDataArray中的"text"
+        )
       )
     )
   );
   
-  //设置model
+  //设置model，将数组nodeDataArray与linkDataArray分配给图表中的node和link
   myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
 
@@ -160,10 +175,10 @@
   myDiagram.add(
     $(go.Part,
       {
-        layerName: "Foreground", 
+        layerName: "Foreground",  //将此节点设置为最上层
         _viewPosition: new go.Point(30,30),
         selectionAdorned: false, 
-        selectionChanged:changePart
+        selectionChanged:changePart //被选中执行方法changePart
       },
       part("M17.984 5.921v8.063h8v-4l6.016 6.016-6.016 6.015v-4.093h-8v8.063h4.031l-6.015 6.015-6.016-6.015h4v-8.063h-8v4.062l-5.984-5.984 5.984-5.984v3.968h8v-8.063h-3.906l5.922-5.921 5.922 5.921h-3.938z",4)  
     )
@@ -173,10 +188,10 @@
   myDiagram.add(
     $(go.Part,
       {
-        layerName: "Foreground", 
+        layerName: "Foreground",  //将此节点设置为最上层
         _viewPosition: new go.Point(60,30),
         selectionAdorned: false, 
-        selectionChanged:changePart
+        selectionChanged:changePart //被选中执行方法changePart
       },
       part("M17.5 4c1.381 0 2.5 1.119 2.5 2.5 0 0.563-0.186 1.082-0.5 1.5l-1 1-3.5-3.5 1-1c0.418-0.314 0.937-0.5 1.5-0.5zM5 15.5l-1 4.5 4.5-1 9.25-9.25-3.5-3.5-9.25 9.25zM15.181 9.681l-7 7-0.862-0.862 7-7 0.862 0.862z",0)
     )
@@ -186,10 +201,10 @@
   myDiagram.add(
     $(go.Part,
       {
-        layerName: "Foreground", 
+        layerName: "Foreground",  //将此节点设置为最上层
         _viewPosition: new go.Point(90,30),
         selectionAdorned: false, 
-        selectionChanged:changePart,
+        selectionChanged:changePart, //被选中执行方法changePart
         click: load
       },
       part("M32 18.451l-16-12.42-16 12.42v-5.064l16-12.42 16 12.42zM28 18v12h-8v-8h-8v8h-8v-12l12-9z",4)   
@@ -226,13 +241,13 @@
   //概述图
   var myOverview =
     $(go.Overview, "myOverviewDiv",
-      { observed: myDiagram });
+      { observed: myDiagram });  //观察图表myDiagram
 
   //node的属性及方法
   function nodeStyle() {
     return [
-      new go.Binding("location", "loc", go.Point.parse),
-      new go.Binding("text").makeTwoWay(),
+      new go.Binding("location", "loc", go.Point.parse),  //用nodeDataArray中的"loc"绑定位置
+      new go.Binding("text").makeTwoWay(),  //双向绑定显示nodeDataArray中的"text"
       {
         name: "PANEL" ,
         locationSpot: go.Spot.Center,
@@ -249,14 +264,14 @@
         { 
           stroke: null,
           alignment:go.Spot.Center,
-          fromLinkable: true, 
-          toLinkable: true,
+          fromLinkable: true,  //fromLinkable：是否可以作为link起点
+          toLinkable: true,  //toLinkable：是否可以作为link终点
           fill: "#e1e1e1",
           portId: 'nodeBg',
         },
-        new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),
-        new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}),
-        new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),
+        new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),  //用nodeDataArray中的"bgSize"双向绑定尺寸
+        new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}), //根据nodeDataArray中的"category"确定是否可以可以作为link起点
+        new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),  //根据nodeDataArray中的"category"确定是否可以可以作为link终点
       )
     
   }
@@ -271,10 +286,10 @@
             cursor: "move",
             fill: "lightblue"
           },
-          new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
-          new go.Binding("cursor", "category",function(v){ return (v == 'Start' ? 'pointer' : 'move')}),
-          new go.Binding("figure", "shape"),
-          new go.Binding("fill", "color")),
+          new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),  //用nodeDataArray中的"size"双向绑定尺寸
+          new go.Binding("cursor", "category",function(v){ return (v == 'Start' ? 'pointer' : 'move')}),  //根据nodeDataArray中的"category"确定鼠标图标
+          new go.Binding("figure", "shape"),  //用nodeDataArray中的"shape"绑定形状
+          new go.Binding("fill", "color")),  //用nodeDataArray中的"color"绑定颜色
         $(go.TextBlock,
          "Default Text", 
          { 
@@ -283,7 +298,7 @@
            stroke: "#fff", 
            font: "14px sans-serif" 
           },
-           new go.Binding("text").makeTwoWay()
+           new go.Binding("text").makeTwoWay()  //用nodeDataArray中的"text"双向绑定显示文字
         )
         
       ),
@@ -291,7 +306,7 @@
     ];
   }
 
-  //左上角图标
+  //左上角显示图标
   function part(str,num){
     return [
       $(go.Shape,'Rectangle',
@@ -321,7 +336,6 @@
     var diagram = node.diagram;
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
     node.ports.each(function(port) {
-      
       port.fill = (show ? "#bbb" : '#e1e1e1');
     });
   }
@@ -384,23 +398,22 @@
     function confirm(){
       editContent.style.display = 'none';
       onOkFn(contentText.value)
-
+      //取消"OK"和"Cancel"按钮监听click事件
       btnOk.removeEventListener('click', confirm);
       btnCancel.removeEventListener('click', cancel);
     }
     function cancel(){
       editContent.style.display = 'none';
       onCancelFn()
-
+      //取消"OK"和"Cancel"按钮监听click事件
       btnOk.removeEventListener('click', confirm);
       btnCancel.removeEventListener('click', cancel);
     }
 
-
-
+    //"OK"按钮监听click事件
     btnOk.addEventListener('click', confirm);
+    //"Cancel"按钮监听click事件
     btnCancel.addEventListener('click', cancel);
-
     
   }
 
