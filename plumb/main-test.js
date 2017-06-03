@@ -1,15 +1,15 @@
 (function(){
   var btnConfirm = true
-  var nodeDataArray = [
-    { key: 1, category:"Start",    "loc":"0 240",   "size":"80 50",   "bgSize":"100 70",  text: "start",       shape: "Ellipse",   color: "#4f6f7e" },
-    { key: 2, category:"Question", "loc":"150 200", "size":"120 120", "bgSize":"140 140", text: "question1",   shape: "Diamond",   color: "#4f6f7e" },
-    { key: 3, category:"Action",   "loc":"330 280", "size":"80 80",   "bgSize":"100 100", text: "action1",     shape: "Rectangle", color: "#4f6f7e" },
-    { key: 4, category:"Question", "loc":"350 100", "size":"120 120", "bgSize":"140 140", text: "question2",   shape: "Diamond",   color: "#4f6f7e" },
-    { key: 5, category:"End",      "loc":"430 450", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "#4f6f7e" },
-    { key: 6, category:"Action",   "loc":"700 250", "size":"80 80",   "bgSize":"100 100", text: "action2",     shape: "Rectangle", color: "#4f6f7e" },
-    { key: 7, category:"End",      "loc":"650 400", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "#4f6f7e" }
-  ];
-  var linkDataArray = [
+	var nodeDataArray = [
+		{ key: 1, category:"Start",    "loc":"0 240",   "size":"80 80",   "bgSize":"100 100", text: "start",       shape: "Ellipse",   color: "brown" },
+    { key: 2, category:"Question", "loc":"150 200", "size":"120 120", "bgSize":"140 140", text: "question1",   shape: "Diamond",   color: "slateblue" },
+    { key: 3, category:"Action",   "loc":"330 280", "size":"80 80",   "bgSize":"100 100", text: "action1",     shape: "Rectangle", color: "orange" },
+    { key: 4, category:"Question", "loc":"350 100", "size":"120 120", "bgSize":"140 140", text: "question2",   shape: "Diamond",   color: "slateblue" },
+    { key: 5, category:"End",      "loc":"430 450", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "aquamarine" },
+    { key: 6, category:"Action",   "loc":"700 250", "size":"80 80",   "bgSize":"100 100", text: "action2",     shape: "Rectangle", color: "orange" },
+    { key: 7, category:"End",      "loc":"650 400", "size":"100 60",  "bgSize":"100 60",  text: "dosomething", shape: "auto",      color: "aquamarine" }
+	];
+	var linkDataArray = [
     { category:"Start", from: 1, to: 2},
     { category:"", from: 2, to: 3, text: "yes" },
     { category:"", from: 2, to: 4, text: "no" },
@@ -17,20 +17,28 @@
     { category:"", from: 4, to: 6, text: "yes" },
     { category:"", from: 6, to: 5, text: "yes" },
     { category:"", from: 6, to: 7, text: "no"}
-  ];
+	];
 
+	var $ = go.GraphObject.make;
 
-  var $ = go.GraphObject.make;
-
-  //create a Diagram
-  var myDiagram =
-    $(go.Diagram, "myDiagramDiv",
-    {
+	var myDiagram =
+  	$(go.Diagram, "myDiagramDiv",
+    { 
       initialContentAlignment: go.Spot.Center,
       allowDrop: true,  
       "undoManager.isEnabled": true,
       "toolManager.mouseWheelBehavior":go.ToolManager.WheelZoom,
     });
+
+  var nodeResizeAdornmentTemplate =
+    $(go.Adornment, "Spot",
+      { locationSpot: go.Spot.Right },
+      $(go.Placeholder),
+      $(go.Shape, { alignment: go.Spot.TopLeft, cursor: "nw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.TopRight, cursor: "ne-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.BottomLeft, cursor: "se-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
+    );
 
   //选中node显示button
   var nodeSelectionAdornmentTemplate = 
@@ -39,13 +47,13 @@
         $(go.Shape, { fill: null, stroke: "dodgerblue", strokeWidth: 3 }),
         $(go.Placeholder)
       ),
-      // this Adornment has two Button of the selected node
+      // and this Adornment has two Button of the selected node
       $("Button",
         {
           cursor: "pointer",
           alignment: go.Spot.TopLeft,
           alignmentFocus: go.Spot.TopLeft,
-          click:function(e,obj){editNode(obj.part.adornedPart);}  // define click behavior for this Button in the Adornment
+          click:function(e,obj){editPanel(obj.part,'update');}  // define click behavior for this Button in the Adornment
         },
         $(go.Shape,
           { 
@@ -61,7 +69,7 @@
           cursor: "pointer",
           alignment: go.Spot.TopRight,
           alignmentFocus: go.Spot.TopRight,
-          click: function(e,obj){deleteNode(obj.part.adornedPart);}  // define click behavior for this Button in the Adornment
+          click: function(e,obj){editPanel(obj.part,'del');}  // define click behavior for this Button in the Adornment
         },
         $(go.Shape, "ThinX",
           { 
@@ -78,20 +86,21 @@
   //按category分别建立节点
   myDiagram.nodeTemplateMap.add("Start",  // the Start category
     $(go.Node, "Spot",
+      new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
       {
         locationSpot: go.Spot.Center,
         mouseEnter: function (e, obj) { obj.part.ports.each(function(port) {
-          port.fill = "#bbb"}); },
+          port.fill = "#aaa"}); },
         mouseLeave: function (e, obj) { obj.part.ports.each(function(port) {
-          port.fill = "#e1e1e1"}); },
+          port.fill = "#ddd"}); },
       },
-      new go.Binding("location", "loc", go.Point.parse),
       nodeBg('Ellipse'),
       nodeTemplate()
   ));
 
   myDiagram.nodeTemplateMap.add("Question",  // the default category
     $(go.Node, "Spot", nodeStyle(),
+      // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Diamond'),
       nodeTemplate()
@@ -99,6 +108,7 @@
 
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
+      // { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate },
       nodeBg('Rectangle'),
       nodeTemplate()
@@ -111,34 +121,33 @@
       nodeTemplate()
   ));
 
-  //按category分别建立连线
-  myDiagram.linkTemplateMap.add("Start",  // the Start category
+	//按category分别建立连线
+  myDiagram.linkTemplateMap.add("Start",
     $(go.Link,
       { routing: go.Link.AvoidsNodes, corner: 5 },
-      $(go.Shape, { strokeWidth: 2, stroke: "#f76258" }),
+      $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
       $(go.Shape,  {
         toArrow:'OpenTriangle',
         fill:null, 
-        stroke: "#f76258",
+        stroke: "#ca221f",
         strokeWidth:2 }
       )
     )
   );
-  myDiagram.linkTemplateMap.add("",  // the default category
+  myDiagram.linkTemplateMap.add("",
     $(go.Link,
       { routing: go.Link.AvoidsNodes, corner: 5 },
       new go.Binding("text").makeTwoWay(),
-      $(go.Shape, { strokeWidth: 2, stroke: "#f76258" }),
+      $(go.Shape, { strokeWidth: 2, stroke: "#ca221f" }),
       $(go.Shape,  {
         toArrow:'OpenTriangle',
         fill:null, 
-        stroke: "#f76258",
+        stroke: "#ca221f",
         strokeWidth:2 }
       ),
-      // 连线中的文字面板
       $(go.Panel, "Auto",
         {
-          click:function(e,obj){editLinkPanel(obj.part);}
+          click:function(e,obj){editPanel(obj.part,'link');}
         },
         $(go.Shape, { fill: "#fff",strokeWidth:0 }),
         $(go.TextBlock, "?", {
@@ -151,17 +160,17 @@
       )
     )
   );
-  
+	
   //设置model
-  myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
+	myDiagram.model = new go.GraphLinksModel(nodeDataArray,linkDataArray)
 
 
-  //左上角移动按钮
+  //移动按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(30,30),
+        _viewPosition: new go.Point(20,20),
         selectionAdorned: false, 
         selectionChanged:changePart
       },
@@ -169,12 +178,12 @@
     )
   );
 
-  //左上角编辑按钮
+  //编辑按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(60,30),
+        _viewPosition: new go.Point(50,20),
         selectionAdorned: false, 
         selectionChanged:changePart
       },
@@ -182,12 +191,12 @@
     )
   );
 
-  //左上角复位按钮
+  //复位按钮
   myDiagram.add(
     $(go.Part,
       {
         layerName: "Foreground", 
-        _viewPosition: new go.Point(90,30),
+        _viewPosition: new go.Point(80,20),
         selectionAdorned: false, 
         selectionChanged:changePart,
         click: load
@@ -195,6 +204,28 @@
       part("M32 18.451l-16-12.42-16 12.42v-5.064l16-12.42 16 12.42zM28 18v12h-8v-8h-8v8h-8v-12l12-9z",4)   
     )
   );
+
+
+  // myDiagram.add(
+  //   $(go.Part,
+  //     {
+  //       layerName: "Foreground", 
+  //       _viewPosition: new go.Point(0,0),
+  //       height:600,
+  //       selectionAdorned: false, 
+  //       // selectionChanged:changeBar
+  //     },
+  //     $(go.Shape, { 
+  //       width: 15, 
+  //       margin: 2, 
+  //       fill: "#f3f3f3", 
+  //       stroke: null,
+  //       stretch: go.GraphObject.Fill 
+  //     })
+  //   )
+  // );
+
+
 
   //保持左上角图标位置不变
   myDiagram.addDiagramListener("ViewportBoundsChanged", function(e) {
@@ -210,21 +241,21 @@
   });
 
 
-  //调色板
-  var myPalette =
+	//调色板
+	var myPalette =
     $(go.Palette, "myPaletteDiv",  
       {
         nodeTemplateMap: myDiagram.nodeTemplateMap,  // share the templates used by myDiagram
         model: new go.GraphLinksModel([ 
-          { category:"Action",   "size":"80 80",   "bgSize":"100 100", text: "Action",   shape: "Rectangle", color: "#4f6f7e" },
-          { category:"Question", "size":"120 120", "bgSize":"140 140", text: "Question", shape: "Diamond",   color: "#4f6f7e" },
-          { category:"End",      "size":"100 60",  "bgSize":"100 60",  text: "Output",   shape: "auto",      color: "#4f6f7e" }
+          { category:"Action",   "size":"80 80",   "bgSize":"100 100", text: "Action",   shape: "Rectangle", color: "orange" },
+          { category:"Question", "size":"120 120", "bgSize":"140 140", text: "Question", shape: "Diamond",   color: "slateblue" },
+          { category:"End",      "size":"100 60",  "bgSize":"100 60",  text: "Output",   shape: "auto",      color: "aquamarine" }
         ])
       });
 
 
   //概述图
-  var myOverview =
+	var myOverview =
     $(go.Overview, "myOverviewDiv",
       { observed: myDiagram });
 
@@ -251,9 +282,10 @@
           alignment:go.Spot.Center,
           fromLinkable: true, 
           toLinkable: true,
-          fill: "#e1e1e1",
+          fill: "#ddd",
           portId: 'nodeBg',
         },
+        // { name: "PANEL" },
         new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),
         new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}),
         new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),
@@ -266,6 +298,8 @@
   function nodeTemplate(){
     return [
       $(go.Panel, "Auto",
+        // { name: "PANEL" },
+        // new go.Binding("desiredSize", "size", go.Size.parse).makeTwoWay(go.Size.stringify),
         $(go.Shape, 
           { 
             cursor: "move",
@@ -280,8 +314,8 @@
          { 
            text:"textAlign:'center'",
            margin: 6, 
-           stroke: "#fff", 
-           font: "14px sans-serif" 
+           stroke: "black", 
+           font: "bold 14px sans-serif" 
           },
            new go.Binding("text").makeTwoWay()
         )
@@ -322,45 +356,12 @@
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
     node.ports.each(function(port) {
       
-      port.fill = (show ? "#bbb" : '#e1e1e1');
+      port.fill = (show ? "#aaa" : '#ddd');
     });
   }
 
-  //编辑node文字
-  function editNode(node){
-    var dialogText = 'Edit '+ node.category +' name';
-    var editText = node.text;
-    showDialog(dialogText, editText, true, function(value){
-      myDiagram.model.setDataProperty(node,'text',value);
-    },function(){
-      console.log('cancel')
-    })
-  }
-
-  //编辑link文字
-  function editLinkPanel(node){
-    var dialogText = 'Enter Text';
-    var editText = node.text;
-    showDialog(dialogText, editText, true, function(value){
-      myDiagram.model.setDataProperty(node,'text',value);
-    },function(){
-      console.log('cancel')
-    })
-  }
-
-  //删除node
-  function deleteNode(node){
-    var dialogText = 'Please Confirm';
-    var editText = "Delete '" + node.text + "'?";
-    showDialog(dialogText, editText, false, function(value){
-      myDiagram.remove(node);
-    },function(){
-      console.log('cancel')
-    })
-  }
-
-  //显示提示框
-  function showDialog(dialogText, editText, isEditable, onOkFn, onCancelFn){
+  //编辑node及link的方法
+  function editPanel(node, str){
     var editContent = document.getElementById("edit-content");
     var contentTitle = document.getElementById("content-title");
     var contentText = document.getElementById("content-text");
@@ -368,44 +369,53 @@
     var btnCancel = document.getElementById("btn-cancel");
     var btnOk = document.getElementById("btn-ok");
 
-    editContent.style.display = 'block';
-    contentTitle.innerHTML = dialogText;
-    contentText.value = editText;
-    contentDel.innerHTML = editText;
+    var oldNode = null;
 
-    if(isEditable){
-      contentText.style.display = 'block';
-      contentDel.style.display = 'none';
+    if(str == 'del'){
+      btnConfirm = true
+      oldNode = node.adornedPart
+    }else if(str == 'update'){
+      btnConfirm = false
+      oldNode = node.adornedPart
     }else{
+      btnConfirm = false
+      oldNode = node
+    }
+
+    editContent.style.display = 'block';
+    if( btnConfirm ){
       contentText.style.display = 'none';
       contentDel.style.display = 'block';
+      contentTitle.innerHTML = 'Please Confirm';
+      contentDel.innerHTML = "Delete '" + oldNode.text + "'?";
+    }else{
+      contentText.style.display = 'block';
+      contentDel.style.display = 'none';
+      contentText.value = oldNode.text;
+      if(str == 'update'){
+        contentTitle.innerHTML = 'Edit '+ oldNode.category +' name';
+      }else{
+        contentTitle.innerHTML = 'Enter Text';
+      }
     }
-
-    function confirm(){
+    btnOk.addEventListener('click', function(){
       editContent.style.display = 'none';
-      onOkFn(contentText.value)
-
-      btnOk.removeEventListener('click', confirm);
-      btnCancel.removeEventListener('click', cancel);
-    }
-    function cancel(){
+      contentText.style.display = 'none';
+      contentDel.style.display = 'none';
+      if( btnConfirm ){
+        myDiagram.remove(oldNode);
+      }else{
+        myDiagram.model.setDataProperty(oldNode,'text',contentText.value);
+      } 
+    })
+    btnCancel.addEventListener('click', function(){
       editContent.style.display = 'none';
-      onCancelFn()
-
-      btnOk.removeEventListener('click', confirm);
-      btnCancel.removeEventListener('click', cancel);
-    }
-
-
-
-    btnOk.addEventListener('click', confirm);
-    btnCancel.addEventListener('click', cancel);
-
-    
+      contentText.style.display = 'none';
+      contentDel.style.display = 'none';
+    })
   }
 
-
-  //点击左上角按钮变化颜色
+  //左上角图标选择改变颜色
   function changePart(node){
     var iconBg = node.findObject("iconBg");
     var shape = node.findObject("shape");
@@ -428,4 +438,6 @@
   function load() {
     myDiagram.model = go.Model.fromJson({nodeDataArray,linkDataArray});
   }
+
+
 })()
