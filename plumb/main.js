@@ -91,6 +91,17 @@
       )
     );
 
+  //改变尺寸,4个角显示圆点
+  var nodeResizeAdornmentTemplate =
+    $(go.Adornment, "Spot",
+      { locationSpot: go.Spot.Right },
+      $(go.Placeholder),
+      $(go.Shape, { alignment: go.Spot.TopLeft, cursor: "nw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.TopRight, cursor: "ne-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.BottomLeft, cursor: "se-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" }),
+      $(go.Shape, { alignment: go.Spot.BottomRight, cursor: "sw-resize", desiredSize: new go.Size(6, 6), fill: "lightblue", stroke: "deepskyblue" })
+    );
+
 
   //按category分别建立节点
   myDiagram.nodeTemplateMap.add("Start",  // the Start category
@@ -103,29 +114,44 @@
           port.fill = "#e1e1e1"}); },
       },
       new go.Binding("location", "loc", go.Point.parse),
-      nodeBg('Ellipse'),
+      // nodeBg('Ellipse'),
       nodeTemplate()
   ));
 
   myDiagram.nodeTemplateMap.add("Question",  // the default category
     $(go.Node, "Spot", nodeStyle(),
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
-      nodeBg('Diamond'), 
-      nodeTemplate()
+      { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },  //被选中后，4个角展示修改尺寸的圆点
+      // nodeBg('Diamond'), 
+      nodeTemplate(),
+      makePort("T", go.Spot.Top, true, true),
+      makePort("L", go.Spot.Left, true, true),
+      makePort("R", go.Spot.Right, true, true),
+      makePort("B", go.Spot.Bottom, true, true)
   ));
 
   myDiagram.nodeTemplateMap.add("End",  // the End category
     $(go.Node, "Spot", nodeStyle(),
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
-      nodeBg('Rectangle'),
-      nodeTemplate()
+      { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },  //被选中后，4个角展示修改尺寸的圆点
+      // nodeBg('Rectangle'),
+      nodeTemplate(),
+      makePort("T", go.Spot.Top, true, false),
+      makePort("L", go.Spot.Left, true, false),
+      makePort("R", go.Spot.Right, true, false),
+      makePort("B", go.Spot.Bottom, true, false)
   ));
 
   myDiagram.nodeTemplateMap.add("Action",  // the Action category
     $(go.Node, "Spot", nodeStyle(),
       { selectionObjectName: "PANEL", selectionAdornmentTemplate: nodeSelectionAdornmentTemplate }, //被选中展示有编辑、删除按钮的面板
-      nodeBg('Rectangle'),
-      nodeTemplate()
+      { resizable: true, resizeObjectName: "PANEL", resizeAdornmentTemplate: nodeResizeAdornmentTemplate },  //被选中后，4个角展示修改尺寸的圆点
+      // nodeBg('Rectangle'),
+      nodeTemplate(),
+      makePort("T", go.Spot.Top, true, true),
+      makePort("L", go.Spot.Left, true, true),
+      makePort("R", go.Spot.Right, true, true),
+      makePort("B", go.Spot.Bottom, true, true)
   ));
 
   //按category分别建立连线
@@ -249,7 +275,7 @@
       new go.Binding("location", "loc", go.Point.parse),  //用nodeDataArray中的"loc"绑定位置
       new go.Binding("text").makeTwoWay(),  //双向绑定显示nodeDataArray中的"text"
       {
-        name: "PANEL" ,
+        // name: "PANEL" ,
         locationSpot: go.Spot.Center,
         cursor:"pointer",
         mouseEnter: function (e, obj) { showPorts(obj.part, true); },
@@ -259,23 +285,37 @@
   }
 
   //node用来增加连线的子面板
-  function nodeBg( shape) {
-    return $(go.Shape, shape,
-        { 
-          stroke: null,
-          alignment:go.Spot.Center,
-          fromLinkable: true,  //fromLinkable：是否可以作为link起点
-          toLinkable: true,  //toLinkable：是否可以作为link终点
-          fill: "#e1e1e1",
-          portId: 'nodeBg',
-        },
-        new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),  //用nodeDataArray中的"bgSize"双向绑定尺寸
-        new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}), //根据nodeDataArray中的"category"确定是否可以可以作为link起点
-        new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),  //根据nodeDataArray中的"category"确定是否可以可以作为link终点
-      )
+  // function nodeBg( shape) {
+  //   return $(go.Shape, shape,
+  //       { 
+  //         stroke: null,
+  //         desiredSize: new go.Size(8, 8),
+  //         alignment:go.Spot.Center,
+  //         fromLinkable: true,  //fromLinkable：是否可以作为link起点
+  //         toLinkable: true,  //toLinkable：是否可以作为link终点
+  //         fill: "#e1e1e1",
+  //         portId: 'nodeBg',
+  //       },
+  //       new go.Binding("desiredSize", "bgSize", go.Size.parse).makeTwoWay(go.Size.stringify),  //用nodeDataArray中的"bgSize"双向绑定尺寸
+  //       new go.Binding("fromLinkable", "category", function(v) { return (v != 'Start' && v != 'End')}), //根据nodeDataArray中的"category"确定是否可以可以作为link起点
+  //       new go.Binding("toLinkable", "category", function(v) { return v != 'Start'}),  //根据nodeDataArray中的"category"确定是否可以可以作为link终点
+  //     )
     
-  }
+  // }
 
+  //node用来增加连线的子面板
+  function makePort(name, spot, output, input) {
+    return $(go.Shape, "Circle",
+     {
+        fill: "transparent",
+        stroke: null,  // this is changed to "white" in the showPorts function
+        desiredSize: new go.Size(12, 12),
+        alignment: spot, alignmentFocus: spot,  // align the port on the main Shape
+        portId: name,  // declare this object to be a "port"
+        fromLinkable: output, toLinkable: input,  // declare whether the user may draw links to/from here
+        cursor: "pointer" 
+     });
+  }
  
   //node展示内容的子面板
   function nodeTemplate(){
@@ -283,6 +323,7 @@
       $(go.Panel, "Auto",
         $(go.Shape, 
           { 
+            name: "PANEL" ,  //选中和修改尺寸查找的属性
             cursor: "move",
             fill: "lightblue"
           },
@@ -336,7 +377,8 @@
     var diagram = node.diagram;
     if (!diagram || diagram.isReadOnly || !diagram.allowLink) return;
     node.ports.each(function(port) {
-      port.fill = (show ? "#bbb" : '#e1e1e1');
+      // port.fill = (show ? "#bbb" : '#e1e1e1');
+      port.stroke = (show ? "white" : null);
     });
   }
 
